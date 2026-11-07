@@ -353,6 +353,18 @@ Create the key file separately using a secure method. Do not paste the key into 
 
 If the backend is already Running, `auth` skips authentication without reading or requiring the key file. This mode still refuses missing state after an established authentication marker; it does not silently replace an existing node identity. The script does not change tailnet tags or ACL policy, force reauthentication, or reset preferences. Auth commands are bounded by a 60-second process timeout and a 45-second connection timeout; they do not fall back to a browser. Actual auth-key enrollment has not been tested. Ordinary `start` never falls back to an auth key automatically.
 
+### Headscale (custom control server)
+
+Set `LOGIN_SERVER` to join a Headscale server instead of Tailscale's control plane. It must be `https://host[:port]`; it is passed as `--login-server` to `login` and `auth`. Use the same value for every `start.sh` call that authenticates, and use a Headscale pre-auth key for `auth`:
+
+```bash
+LOGIN_SERVER=https://headscale.example.net NODE_HOSTNAME=dots-sandbox \
+DOTS_TS_AUTH_KEY_FILE=/workspace/.dots-tailscale/auth.key \
+  bash /workspace/.dots-tailscale/start.sh auth
+```
+
+Changing `source-manifest.json` hashes makes `dots-ts update` verification against upstream releases fail; update from this fork only.
+
 ## Check HOME continuity
 
 Run the probe from the repository checkout in Dots:

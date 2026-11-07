@@ -3,7 +3,7 @@
     "dots-ts": "cb4503517686c124c6bcf3e79701750d3508f736bab0e3e0a88b140057963b64",
     "dots_proxy.py": "6d94613bc546e297b657064ecae7b93db5da2d8c277d43b3e71b2c53f681c68d",
     "shim.py": "f0d98b55089a0095c4a14c6a21e2a8874cdb5df6675ad475b271500ac9effac3",
-    "tailscale-setup.sh": "29adb7c37dde3d9556fd51c97c0d5c06635efa8f8ed052f3c897725f627b2b06"
+    "tailscale-setup.sh": "a7756a90807a4410639dcfac7324c0f16928854b717fa4621b528c3e31eedf2c"
   },
   "package_version": "0.9.0",
   "schema_version": 1

@@ -11,6 +11,13 @@ SOURCE="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 TS_VERSION=1.104.4
 UPSTREAM_PROXY="${UPSTREAM_PROXY:-http://browser-proxy:8889}"
 NODE_HOSTNAME="${NODE_HOSTNAME:-dots-sandbox}"
+# Empty means Tailscale's own control plane; set e.g. https://headscale.example.net for Headscale.
+LOGIN_SERVER="${LOGIN_SERVER:-}"
+login_server_args=()
+if [[ -n "$LOGIN_SERVER" ]]; then
+  [[ "$LOGIN_SERVER" =~ ^https://[A-Za-z0-9.-]+(:[0-9]+)?$ ]] || { echo 'LOGIN_SERVER must look like https://host[:port]' >&2; exit 2; }
+  login_server_args=(--login-server="$LOGIN_SERVER")
+fi
 fail() { printf 'failed: %s\n' "$*" >&2; exit 1; }
 TS() { timeout 20 "$D/tailscale" --socket="$SOCK" "$@"; }
 require() { command -v "$1" >/dev/null || fail "missing command: $1"; }
@@ -417,7 +424,7 @@ if not stat.S_ISREG(st.st_mode) or st.st_uid != os.getuid(): sys.exit('Auth key 
 if stat.S_IMODE(st.st_mode) not in (0o600, 0o400): sys.exit('Auth key permissions must be 600 or 400')
 if not st.st_size: sys.exit('Auth key file is empty')
 AUTH
-  timeout 60 "$D/tailscale" --socket="$SOCK" up --auth-key="file:$key_file" \
+  timeout 60 "$D/tailscale" --socket="$SOCK" up ${login_server_args[@]+"${login_server_args[@]}"} --auth-key="file:$key_file" \
     --hostname="$NODE_HOSTNAME" --ssh=false --timeout=45s || AUTH_COMMAND_STATUS=$?
 }
 case "$MODE" in check|install|start|login|auth) ;; *) fail 'usage: tailscale-setup.sh [check|install|start|login|auth]';; esac
@@ -445,7 +452,7 @@ if [[ "$MODE" = login ]]; then
   # NeedsLogin is ready for explicit up; machine approval needs no new login.
   state="$(backend 30 api)"
   if [[ "$state" != NeedsMachineAuth ]]; then
-    timeout 180 "$D/tailscale" --socket="$SOCK" up --hostname="$NODE_HOSTNAME" --ssh=false || AUTH_COMMAND_STATUS=$?
+    timeout 180 "$D/tailscale" --socket="$SOCK" up ${login_server_args[@]+"${login_server_args[@]}"} --hostname="$NODE_HOSTNAME" --ssh=false || AUTH_COMMAND_STATUS=$?
   fi
 fi
 if [[ "$MODE" = auth ]]; then authenticate_with_key; fi
